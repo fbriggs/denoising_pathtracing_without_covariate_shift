@@ -89,11 +89,11 @@ struct Sphere {
   }
 };
 
-inline float randf01() { return float(rand()) / float(RAND_MAX); }
+inline float randUniform() { return float(rand()) / float(RAND_MAX); }
 
 static inline Vec3f randomUnitVec() {
-  const float r1 = randf01();
-  const float r2 = randf01();
+  const float r1 = randUniform();
+  const float r2 = randUniform();
   const float phi = 2.0f * M_PI * r1;
   const float theta = acos(1.0f - 2.0f * r2);
   const float x = 2.0f * cos(2.0f * M_PI * r1) * sqrtf(r2 * (1.0f - r2));
@@ -105,8 +105,8 @@ static inline Vec3f randomUnitVec() {
 static inline Vec3f randomUnitVecCosDistrib(const Vec3f& n) {
   const Vec3f uu = (Vec3f(0, 1, 1) % n).norm();
   const Vec3f vv = uu % n;
-  const float r0 = randf01();
-  const float r1 = randf01();
+  const float r0 = randUniform();
+  const float r1 = randUniform();
   const float ra = sqrtf(r1);
   const float rx = ra * cosf(2.0 * M_PI * r0);
   const float ry = ra * sinf(2.0 * M_PI * r0);
@@ -178,7 +178,7 @@ static Vec3f pathTrace(
     (1.0f - hitSphere.specularCoef);
 
   Vec3f indirectLightColor;
-  if (randf01() < hitSphere.specularCoef) { // specular/mirror
+  if (randUniform() < hitSphere.specularCoef) { // specular/mirror
     const Vec3f reflectDir = rayDir - normal * (2.0f * normal.dot(rayDir));
     const Vec3f indirectDir =
       (reflectDir + randomUnitVec() * hitSphere.specularRadius).norm();
@@ -274,8 +274,8 @@ Vec3f primaryRayColor(
   Vec3f color(0, 0, 0);
   for (int sample = 0; sample < numSamples; ++sample) {
     const Vec3f rayDir = Vec3f(
-      x - w/2 + randf01() - 0.5f,
-      y - h/2 + randf01() - 0.5f,
+      x - w/2 + randUniform() - 0.5f,
+      y - h/2 + randUniform() - 0.5f,
       1.0*h).norm();
 
     color = color + pathTrace(rayOrigin, rayDir, spheres, lightIndices);
@@ -374,7 +374,7 @@ int main(int argc, char** argv) {
   vector<float> targetsB;
   vector<float> instWeights;
   mapXYThreadPool(w, h, [&](const int x, const int y) {
-    if (randf01() < kHiSampleFrac) {
+    if (randUniform() < kHiSampleFrac) {
       const Vec3f hiQualityColor = primaryRayColor(
         spheres, lightIndices, kNumSamplesHi, w, h, x, y);
       const vector<float> patchFV = getPatchFeature(
