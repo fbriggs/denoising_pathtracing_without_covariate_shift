@@ -18,11 +18,11 @@ Path-tracing works by simulating how photons are emitted from a light source, th
 
 A common method for de-noising path tracing using machine learning is to get a large collection of images, then add noise, then learn a model which maps patches of the noisy corrupted image to the same patch of the original, less noisy image. Then the learned model can be applied to a noisy image produced by path tracing with a smaller number of photons. The main problem with this approach is that the distribution of training data will not necessarily match the distribution of test data, resulting in unsatisfactory results / artifacts. Mismatch between training and test distributions is called "covariate-shift" in machine learning literature.
 
-In this sample code, I show how to do de-noising for path tracing using machine learning, without covariate shift! This is a novel algorithm as far as I know. The idea is this:
+In this sample code, I show how to do de-noising for path tracing using machine learning, without covariate shift. This is a novel algorithm as far as I know. The idea is this:
 1. Render the image using a relatively small number of photons per pixel, e.g., 100.
 2. For some small fraction of pixels chosen at random (e.g., 1%) render only that pixel using a larger number of photons (e.g., 2000). Suppose there are N pixels to be rendered. We spent 100*N photos in pass (1), then 0.01 * 2000 * N = 20N more photons in pass (2). So in total, we have only spent 120 * N photons, a mere 20% more than we did in pass (1).
-3. Train a machine learning model such as a decision tree ensemble to map a small patch of pixels in the noisy image from pass (1) to the better pixel at the center of the same patch obtained in pass (2), using only the pixels where we spent the larger number of photons as training examples. Note that these training examples come from exactly the same distribution as the rest of the image, so there is no problem with covariate-shift!
-3. Apply the learned model to all of the pixels in the noisy image to get a less noisy image.
+3. Train a machine learning model such as a decision tree ensemble to map a small patch of pixels in the noisy image from pass (1) to the better pixel at the center of the same patch obtained in pass (2), using only the pixels where we spent the larger number of photons as training examples. Note that these training examples come from exactly the same distribution as the rest of the image, so there is no problem with covariate-shift.
+4. Apply the learned model to all of the pixels in the noisy image to get a less noisy image.
 
 This algorithm works surprisingly well (see results below). In order for it to be a win in quality, the number of photons per pixel in phase (2) must be sufficient to produce a low-noise result, and the fraction of pixels at which we sample a larger number of photons must also be large enough to obtain sufficient training data (1% works in this simple test scene, but more might be needed for more complex scenes).
 
@@ -40,6 +40,6 @@ Before de-noising (23.0174 sec):
 
 ![before](out.png)
 
-After de-noising (3.18205 sec training + 0.699575 sec to apply):
+After de-noising (3.18205 sec training + 0.699575 sec to apply. Compare this to spending 20x more runtime to simulate 2000 photons per pixel):
 
 ![after](out_denoised.png)
