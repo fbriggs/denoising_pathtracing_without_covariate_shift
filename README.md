@@ -40,6 +40,6 @@ Before de-noising (23.0174 sec):
 
 ![before](out.png)
 
-After de-noising (3.18205 sec training + 0.699575 sec to apply. Compare this to spending 20x more runtime to simulate 2000 photons per pixel):
+After de-noising (3.18205 sec training + 0.699575 sec to apply):
 
 ![after](out_denoised.png)
